@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# configuration
+MQTT="emonpi.local"
+TOPIC="/battery_level"
+LEVEL=40
+
+# read the MQTT topic
+BATTERY=50
+
+# is battery low
+if [ $BATTERY -lt $LEVEL ]; then
+	# raise ALERT
+	logger "Battery needs refilling (${BATTERY}%)"
+	which beep && beep
+fi
+
+exit 0

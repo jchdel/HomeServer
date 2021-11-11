@@ -1,0 +1,64 @@
+#!/bin/sh
+
+MQTTHOST=emonpi.local
+MQTTUSER=emonpi
+MQTTPASS=emonpimqtt2016
+MQTTPORT=1883
+
+TEMPERATURE=14
+BATTERY=76
+PRODUCTION=0
+CONSUMPTION=30
+STATUS=1
+METEO=rain
+
+publish(){
+	VALUE=$1
+	TOPIC=/emon/relay/control/1
+	# call mosquitto-pub
+	echo $VALUE
+}
+
+is_room_warm(){
+	[ $TEMPERATURE -gt 16 ] && return 0 || return 1
+}
+
+is_battery_loaded(){
+	# THRESHOLD = $1
+	[ $BATTERY -gt $1 ] && return 0 || return 1
+}
+
+is_morning(){
+	HOUR=$(date +%H)
+	[ $HOUR -gt 11 ] && return 1
+	[ $HOUR -lt 6 ] && return 1
+	return 0
+}
+
+is_forecast_sunny(){
+	return 1
+}
+
+push_relay(){
+	[ $STATUS -ne $1 ] && publish $1
+	exit 0
+}
+
+set_relay_off(){
+	push_relay 0
+}
+
+set_relay_on(){
+	push_relay 1
+}
+
+is_room_warm && set_relay_off
+is_battery_loaded 60 || set_relay_off
+BALANCE=$(($PRODUCTION-$CONSUMPTION))
+[ $BALANCE -lt -50 ] && set_relay_off
+[ $BALANCE -gt 450 ] && set_relay_on
+[ $STATUS -eq 1 ] && set_relay_on 
+is_battery_loaded 75 || set_relay_off
+is_morning || set_relay_off
+is_forecast_sunny && set_relay_on
+set_relay_off

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Author: Jean-Charles de Longueville
+# License: Public domain - Use at your own risks
+[ -f ~/.secret ] && . ~/.secret
+apt-get update
+apt-get upgrade -y
+apt-get install \
+	unbound chrony

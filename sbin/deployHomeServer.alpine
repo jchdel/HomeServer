@@ -1,0 +1,9 @@
+#!/bin/sh
+# Author: Jean-Charles de Longueville
+# License: Public domain - Use at your own risks
+[ -f ~/.secret ] && . ~/.secret
+apk update
+apk fix
+apk add \
+	unbound chrony
+
